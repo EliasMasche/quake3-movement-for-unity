@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Cinemachine;
+using UnityEngine;
 
 namespace Q3Movement
 {
@@ -23,26 +24,34 @@ namespace Q3Movement
             }
         }
 
-        [Header("Aiming")]
-        [SerializeField] private Camera m_Camera;
+        [Header("Aiming")] 
+        [SerializeField] private CinemachineVirtualCamera m_Camera;
         [SerializeField] private MouseLook m_MouseLook = new MouseLook();
 
         [Header("Movement")]
         [SerializeField] private float m_Friction = 6;
         [SerializeField] private float m_Gravity = 20;
         [SerializeField] private float m_JumpForce = 8;
-        [Tooltip("Automatically jump when holding jump button")]
-        [SerializeField] private bool m_AutoBunnyHop = false;
-        [Tooltip("How precise air control is")]
-        [SerializeField] private float m_AirControl = 0.3f;
+        
+        [Tooltip("Automatically jump when holding jump button")] [SerializeField]
+        private bool m_AutoBunnyHop = false;
+
+        [Tooltip("How precise air control is")] [SerializeField]
+        private float m_AirControl = 0.3f;
+
         [SerializeField] private MovementSettings m_GroundSettings = new MovementSettings(7, 14, 10);
         [SerializeField] private MovementSettings m_AirSettings = new MovementSettings(7, 2, 2);
         [SerializeField] private MovementSettings m_StrafeSettings = new MovementSettings(1, 50, 50);
 
+        private InputManager _inputManager;
+        
         /// <summary>
         /// Returns player's current speed.
         /// </summary>
-        public float Speed { get { return m_Character.velocity.magnitude; } }
+        public float Speed
+        {
+            get { return m_Character.velocity.magnitude; }
+        }
 
         private CharacterController m_Character;
         private Vector3 m_MoveDirectionNorm = Vector3.zero;
@@ -58,21 +67,30 @@ namespace Q3Movement
         private Transform m_Tran;
         private Transform m_CamTran;
 
+        //Variable for Input System that replace Input 'Horizontal' 'Vertical' Axis
+        private Vector2 m_MoveDirection;
+        private Vector2 m_MouseDeltaInput;
+        
         private void Start()
         {
             m_Tran = transform;
             m_Character = GetComponent<CharacterController>();
-
-            if (!m_Camera)
-                m_Camera = Camera.main;
-
+            _inputManager = InputManager.Instance;
+        
+            //Still thinking to maintain this code or adapt it for Cinemachine
+            //if you uncomment this will give an error because Cinemachine doesn't have .main
+            //if (!m_Camera)
+            //    m_Camera = Camera.main;
+        
             m_CamTran = m_Camera.transform;
-            m_MouseLook.Init(m_Tran, m_CamTran);
+            m_MouseLook.Init(m_Tran, m_CamTran, _inputManager);
         }
 
         private void Update()
         {
-            m_MoveInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
+            m_MoveDirection = _inputManager.OnMovePerformed();
+            m_MouseDeltaInput = _inputManager.OnMouseLook();
+            m_MoveInput = new Vector3(m_MoveDirection.x, 0, m_MoveDirection.y);
             m_MouseLook.UpdateCursorLock();    
             QueueJump();
 
@@ -87,27 +105,28 @@ namespace Q3Movement
             }
 
             // Rotate the character and camera.
-            m_MouseLook.LookRotation(m_Tran, m_CamTran);
+            m_MouseLook.LookRotation(m_Tran, m_CamTran, m_MouseDeltaInput);
 
             // Move the character.
             m_Character.Move(m_PlayerVelocity * Time.deltaTime);
         }
-
+        
         // Queues the next jump.
         private void QueueJump()
         {
+            
             if (m_AutoBunnyHop)
             {
-                m_JumpQueued = Input.GetButton("Jump");
+                m_JumpQueued = _inputManager.OnJumpTriggered();
                 return;
             }
 
-            if (Input.GetButtonDown("Jump") && !m_JumpQueued)
+            if (_inputManager.OnJumpButtonDown() && !m_JumpQueued)
             {
                 m_JumpQueued = true;
             }
 
-            if (Input.GetButtonUp("Jump"))
+            if (_inputManager.OnJumpButtonUp())
             {
                 m_JumpQueued = false;
             }
