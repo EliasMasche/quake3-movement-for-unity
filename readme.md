@@ -1,6 +1,14 @@
 Implementation of Quake III "vanilla" and Challenge ProMode Arena (CPMA) strafe jumping mechanics in the Unity engine.
 
-This is my own updated and enhanced fork of the original scripts created by [WiggleWizard](https://github.com/WiggleWizard). So most of the credit goes to him for porting it over. I am just trying to improve upon it some here.
+This is a fork that replace UnityEngine.Input to UnityEngine.InputSystem, The Input System package implements a system to use any kind of Input Device to control your Unity content and Camera to Cinemachine suite of tools for creative camera that becoming the standard of Camera Management in Unity, tools that i am using on my project, original scripts created by [WiggleWizard](https://github.com/WiggleWizard). So most of the credit goes to him for porting it over and the port/fork is from the updated version from [IsaiahKelly](https://github.com/IsaiahKelly/quake3-movement-for-unity).
+
+## Requirements:
+
+- Cinemachine: [2.7.x](https://docs.unity3d.com/Packages/com.unity.cinemachine@2.7/manual/index.html)
+- InputSystem [1.1.0-preview.3](https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/manual/QuickStartGuide.html)
+
+### Why Preview for InputSystem.
+I am using new features that are only available in 1.1.x that replace Input.GetMouseButton/.GetMouseButtonDown/.GetMouseButtonUp to InputSystem ButtonControl.isPressed / ButtonControl.wasPressedThisFrame / ButtonControl.wasReleasedThisFrame
 
 ## Notes:
 
