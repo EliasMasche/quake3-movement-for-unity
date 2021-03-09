@@ -2,6 +2,9 @@ Implementation of Quake III "vanilla" and Challenge ProMode Arena (CPMA) strafe 
 
 This is a fork that replace UnityEngine.Input to UnityEngine.InputSystem, The Input System package implements a system to use any kind of Input Device to control your Unity content and Camera to Cinemachine suite of tools for creative camera that becoming the standard of Camera Management in Unity, tools that i am using on my project, original scripts created by [WiggleWizard](https://github.com/WiggleWizard). So most of the credit goes to him for porting it over and the port/fork is from the updated version from [IsaiahKelly](https://github.com/IsaiahKelly/quake3-movement-for-unity).
 
+So far is already usable on projects, can be look messy or disorganized as i am developing, learning as it goes with InputSystem, so if you have proper feedback you can open issues or request PR. i will gladly read them.
+
+
 ## Requirements:
 
 - Cinemachine: [2.7.x](https://docs.unity3d.com/Packages/com.unity.cinemachine@2.7/manual/index.html)
