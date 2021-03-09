@@ -43,7 +43,7 @@ namespace Q3Movement
         [SerializeField] private MovementSettings m_AirSettings = new MovementSettings(7, 2, 2);
         [SerializeField] private MovementSettings m_StrafeSettings = new MovementSettings(1, 50, 50);
 
-        private InputManager _inputManager;
+        private PlayerInputManager m_PlayerInputManager;
         
         /// <summary>
         /// Returns player's current speed.
@@ -75,7 +75,7 @@ namespace Q3Movement
         {
             m_Tran = transform;
             m_Character = GetComponent<CharacterController>();
-            _inputManager = InputManager.Instance;
+            m_PlayerInputManager = PlayerInputManager.Instance;
         
             //Still thinking to maintain this code or adapt it for Cinemachine
             //if you uncomment this will give an error because Cinemachine doesn't have .main
@@ -83,13 +83,13 @@ namespace Q3Movement
             //    m_Camera = Camera.main;
         
             m_CamTran = m_Camera.transform;
-            m_MouseLook.Init(m_Tran, m_CamTran, _inputManager);
+            m_MouseLook.Init(m_Tran, m_CamTran, m_PlayerInputManager);
         }
 
         private void Update()
         {
-            m_MoveDirection = _inputManager.OnMovePerformed();
-            m_MouseDeltaInput = _inputManager.OnMouseLook();
+            m_MoveDirection = m_PlayerInputManager.OnMovePerformed();
+            m_MouseDeltaInput = m_PlayerInputManager.OnMouseLook();
             m_MoveInput = new Vector3(m_MoveDirection.x, 0, m_MoveDirection.y);
             m_MouseLook.UpdateCursorLock();    
             QueueJump();
@@ -117,16 +117,16 @@ namespace Q3Movement
             
             if (m_AutoBunnyHop)
             {
-                m_JumpQueued = _inputManager.OnJumpTriggered();
+                m_JumpQueued = m_PlayerInputManager.OnJumpTriggered();
                 return;
             }
 
-            if (_inputManager.OnJumpButtonDown() && !m_JumpQueued)
+            if (m_PlayerInputManager.OnJumpButtonDown() && !m_JumpQueued)
             {
                 m_JumpQueued = true;
             }
 
-            if (_inputManager.OnJumpButtonUp())
+            if (m_PlayerInputManager.OnJumpButtonUp())
             {
                 m_JumpQueued = false;
             }
