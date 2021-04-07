@@ -42,8 +42,7 @@ namespace Q3Movement
         [SerializeField] private MovementSettings m_GroundSettings = new MovementSettings(7, 14, 10);
         [SerializeField] private MovementSettings m_AirSettings = new MovementSettings(7, 2, 2);
         [SerializeField] private MovementSettings m_StrafeSettings = new MovementSettings(1, 50, 50);
-
-        private PlayerInputManager m_PlayerInputManager;
+        [SerializeField] private PlayerInputManager m_PlayerInputManager;
         
         /// <summary>
         /// Returns player's current speed.
@@ -70,12 +69,29 @@ namespace Q3Movement
         //Variable for Input System that replace Input 'Horizontal' 'Vertical' Axis
         private Vector2 m_MoveDirection;
         private Vector2 m_MouseDeltaInput;
+
+        private void OnEnable()
+        {
+            m_PlayerInputManager.jumpEvent += OnJumpInitiated;
+            m_PlayerInputManager.jumpCanceledEvent += OnJumpCanceled;
+            m_PlayerInputManager.moveEvent += OnMovement;
+            m_PlayerInputManager.cameraMoveEvent += OnCameraRotation;
+            m_PlayerInputManager.cancelEvent += OnCancel;
+        }
+
+        private void OnDisable()
+        {
+            m_PlayerInputManager.jumpEvent -= OnJumpInitiated;
+            m_PlayerInputManager.jumpCanceledEvent -= OnJumpCanceled;
+            m_PlayerInputManager.moveEvent -= OnMovement;
+            m_PlayerInputManager.cameraMoveEvent -= OnCameraRotation;
+            m_PlayerInputManager.cancelEvent -= OnCancel;
+        }
         
         private void Start()
         {
             m_Tran = transform;
             m_Character = GetComponent<CharacterController>();
-            m_PlayerInputManager = PlayerInputManager.Instance;
         
             //Still thinking to maintain this code or adapt it for Cinemachine
             //if you uncomment this will give an error because Cinemachine doesn't have .main
@@ -88,8 +104,6 @@ namespace Q3Movement
 
         private void Update()
         {
-            m_MoveDirection = m_PlayerInputManager.OnMovePerformed();
-            m_MouseDeltaInput = m_PlayerInputManager.OnMouseLook();
             m_MoveInput = new Vector3(m_MoveDirection.x, 0, m_MoveDirection.y);
             m_MouseLook.UpdateCursorLock();    
             QueueJump();
@@ -114,22 +128,26 @@ namespace Q3Movement
         // Queues the next jump.
         private void QueueJump()
         {
-            
+            //Legacy
+            //if (m_AutoBunnyHop)
+            //{
+            //    m_JumpQueued = m_PlayerInputManager.OnJumpTriggered();
+            //    return;
+            //}
+            //if (m_PlayerInputManager.OnJumpButtonDown() && !m_JumpQueued)
+            //    m_JumpQueued = true;
+            //if (m_PlayerInputManager.OnJumpButtonUp())
+            //    m_JumpQueued = false;
             if (m_AutoBunnyHop)
             {
-                m_JumpQueued = m_PlayerInputManager.OnJumpTriggered();
+                m_JumpQueued = m_PlayerInputManager.OnJumpButtonState();
                 return;
             }
 
-            if (m_PlayerInputManager.OnJumpButtonDown() && !m_JumpQueued)
-            {
+            if (m_PlayerInputManager.OnJumpButtonState() && !m_JumpQueued)
                 m_JumpQueued = true;
-            }
-
-            if (m_PlayerInputManager.OnJumpButtonUp())
-            {
+            if (m_PlayerInputManager.OnJumpButtonState())
                 m_JumpQueued = false;
-            }
         }
 
         // Handle air movement.
@@ -297,6 +315,33 @@ namespace Q3Movement
 
             m_PlayerVelocity.x += accelspeed * targetDir.x;
             m_PlayerVelocity.z += accelspeed * targetDir.z;
+        }
+        
+        // --- EVENT LISTENERS ---
+
+        private void OnMovement(Vector2 movement)
+        {
+            m_MoveDirection = movement;
+        }
+
+        private void OnCameraRotation(Vector2 cameraDeltaInput)
+        {
+            m_MouseDeltaInput = cameraDeltaInput;
+        }
+
+        private void OnJumpInitiated()
+        {
+            m_JumpQueued = true;
+        }
+
+        private void OnJumpCanceled()
+        {
+            m_JumpQueued = false;
+        }
+
+        private void OnCancel()
+        {
+            Debug.Log("Temporary Fix");
         }
     }
 }

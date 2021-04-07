@@ -9,8 +9,8 @@ namespace Q3Movement
     [Serializable]
     public class MouseLook
     {
-        [SerializeField] private float m_XSensitivity = 2f;
-        [SerializeField] private float m_YSensitivity = 2f;
+        [SerializeField] private float m_XSensitivity = 1f;
+        [SerializeField] private float m_YSensitivity = 1f;
         [SerializeField] private bool m_ClampVerticalRotation = true;
         [SerializeField] private float m_MinimumX = -90F;
         [SerializeField] private float m_MaximumX = 90F;
@@ -20,14 +20,16 @@ namespace Q3Movement
 
         private Quaternion m_CharacterTargetRot;
         private Quaternion m_CameraTargetRot;
-        private bool m_cursorIsLocked = true;
-        private PlayerInputManager m_MouseState;
+        
+        bool m_CursorIsLocked = true;
+        PlayerInputManager m_PlayerInputManager; 
         
         public void Init(Transform character, Transform camera, PlayerInputManager playerInputManager)
         {
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
-            m_MouseState = playerInputManager;
+            m_PlayerInputManager = playerInputManager;
+            
         }
 
         public void LookRotation(Transform character, Transform camera, Vector2 mouseDelta)
@@ -80,24 +82,21 @@ namespace Q3Movement
 
         private void InternalLockUpdate()
         {
-            if (m_MouseState.OnEscButton())
-            {
-                m_cursorIsLocked = false;
-            }
-            else if (m_MouseState.CursorLock())
-            {
-                m_cursorIsLocked = true;
-            }
+            if (m_PlayerInputManager.EscapeButtonDown())
+                m_CursorIsLocked = false;
+            else if (m_PlayerInputManager.LeftMouseDown())
+                m_CursorIsLocked = true;
 
-            if (m_cursorIsLocked)
+            switch (m_CursorIsLocked)
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-            else if (!m_cursorIsLocked)
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                case true:
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    break;
+                case false:
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    break;
             }
         }
 
